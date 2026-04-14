@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Heather's Workout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#EC008C', secondary: '#00A79D' },
+          fontFamily: { sans: ['Open Sans', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    body { margin: 0; font-family: 'Open Sans', sans-serif; background-color: #d1d5db; }
+    .shadow-app { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .shadow-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+<script>
+// ====================================================================
+// ICONS
+// ====================================================================
+const ICONS = {
+  droplet:          { paths: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>', filled: true },
+  user:             '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  'chevron-right':  '<path d="m9 18 6-6-6-6"/>',
+  'check-circle-2': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  moon:             '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
+  bike:             '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+  dumbbell:         '<path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/>',
+  'trending-up':    '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'arrow-left':     '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  check:            '<path d="M20 6 9 17 4 12"/>',
+  play:             '<polygon points="5 3 19 12 5 21 5 3"/>',
+  x:                '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'calendar-days':  '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>',
+  'chevron-down':   '<path d="m6 9 6 6 6-6"/>',
+  'chevron-up':     '<path d="m18 15-6-6-6 6"/>',
+  trash2:           '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  'alert-triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'bar-chart-2':    '<line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>',
+  utensils:         '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/>',
+  calendar:         '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+  users:            '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+};
+
+function icon(name, cls = 'w-5 h-5') {
+  const def = ICONS[name];
+  if (!def) return '';
+  const paths = typeof def === 'object' ? def.paths : def;
+  const filled = typeof def === 'object' && def.filled;
+  return `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="${filled ? 'none' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+
+// ====================================================================
+// WORKOUT DATA
+// ====================================================================
+const workoutProgram = {
+  title: "Heathers Workout",
+  weekSchedule: [
+    { day: "Mon", label: "Monday",    type: "resistance", workoutId: "Strength A",       workoutName: "Strength A",        meta: "Full Body (Hinge + Squat) · 35-45 Mins" },
+    { day: "Tue", label: "Tuesday",   type: "cardio",     workoutId: "Cardio_Intervals",  workoutName: "Bike Intervals",    meta: "High Intensity · 10-20 Mins" },
+    { day: "Wed", label: "Wednesday", type: "resistance", workoutId: "Strength B",       workoutName: "Strength B",        meta: "Unilateral + Abductors · 30-40 Mins" },
+    { day: "Thu", label: "Thursday",  type: "rest",       workoutId: "Rest",             workoutName: "Rest",              isRest: true },
+    { day: "Fri", label: "Friday",    type: "resistance", workoutId: "Strength C",       workoutName: "Strength C",        meta: "Posterior Chain + Power · 35-45 Mins" },
+    { day: "Sat", label: "Saturday",  type: "cardio",     workoutId: "Cardio_Steady",    workoutName: "Bike Steady / Mixed", meta: "Low–Moderate Intensity · 20-60 Mins" },
+    { day: "Sun", label: "Sunday",    type: "rest",       workoutId: "Rest2",            workoutName: "Rest",              isRest: true },
+  ],
+  resistance_sections: [
+    {
+      id: "Strength A", category_title: "Resistance", workout_name: "Full Body (Hinge + Squat)",
+      meta: { total_blocks: 3, avg_time: "35-45 Mins" },
+      warm_up: [
+        { id: "wu1", name: "90/90 Hip Rotations",       reps: "6/side",  video: "https://www.youtube.com/shorts/6dfkYZm9tpE" },
+        { id: "wu2", name: "World's Greatest Stretch",  reps: "3/side",  video: "https://www.youtube.com/watch?v=-CiWQ2IvY34" },
+        { id: "wu3", name: "Banded Lateral Walks",      reps: "15/side", video: "https://www.youtube.com/watch?v=1LvxZrJFy9Y" },
+        { id: "wu4", name: "Glute Bridge",              reps: "15",      video: "https://www.youtube.com/shorts/R1OXPHRqehw" }
+      ],
+      blocks: [
+        { block_name: "Block 1", exercises: [
+          { id: "sa1", name: "A1. Romanian Deadlift (DB/KB)",      reps: "8-10",    video: "https://www.youtube.com/watch?v=IJdUtnxAmNo" },
+          { id: "sa2", name: "A2. Heel-Elevated Goblet Squat",     reps: "10-12",   video: "https://www.youtube.com/watch?v=XJJQu6Uc7kU" }
+        ]},
+        { block_name: "Block 2", exercises: [
+          { id: "sa3", name: "B1. Single-Arm Row",                 reps: "8-10/side", video: "https://www.youtube.com/watch?v=ZRSGpBUVcNw" },
+          { id: "sa4", name: "B2. Half-Kneeling Overhead Press",   reps: "8/side",  video: "https://www.youtube.com/watch?v=UmJWdBrFzWk" }
+        ]},
+        { block_name: "Block 3", exercises: [
+          { id: "sa5", name: "C1. Banded Hip Thrust",   reps: "12-15",    video: "https://www.youtube.com/shorts/pSwLdoIwPik", noWeightInput: true },
+          { id: "sa6", name: "C2. Pallof Press",        reps: "10-12/side", video: "https://www.youtube.com/watch?v=RQJ-9NgZXYs" }
+        ]}
+      ]
+    },
+    {
+      id: "Strength B", category_title: "Resistance", workout_name: "Unilateral + Abductors",
+      meta: { total_blocks: 3, avg_time: "30-40 Mins" },
+      warm_up: [
+        { id: "wb_wu1", name: "90/90 Hip Rotations",      reps: "6/side",  video: "https://www.youtube.com/shorts/6dfkYZm9tpE" },
+        { id: "wb_wu2", name: "World's Greatest Stretch", reps: "3/side",  video: "https://www.youtube.com/watch?v=-CiWQ2IvY34" },
+        { id: "wb_wu3", name: "Banded Lateral Walks",     reps: "15/side", video: "https://www.youtube.com/watch?v=1LvxZrJFy9Y" },
+        { id: "wb_wu4", name: "Glute Bridge",             reps: "15",      video: "https://www.youtube.com/shorts/R1OXPHRqehw" }
+      ],
+      blocks: [
+        { block_name: "Block 1", exercises: [
+          { id: "sb1", name: "A1. Bulgarian Split Squat", reps: "8/side",  video: "https://www.youtube.com/watch?v=rah3eJCPXHA" },
+          { id: "sb2", name: "A2. Single-Leg RDL",       reps: "8/side",  video: "https://www.youtube.com/shorts/wHktyQBgejo" }
+        ]},
+        { block_name: "Block 2", exercises: [
+          { id: "sb3", name: "B1. Dumbbell Floor Press",  reps: "8-12",    video: "https://www.youtube.com/watch?v=vagdk94bFn4" },
+          { id: "sb4", name: "B2. Chest-Supported Row",  reps: "10-12",   video: "https://www.youtube.com/shorts/G35gTqGcXXA" }
+        ]},
+        { block_name: "Block 3", exercises: [
+          { id: "sb5", name: "C1. Standing Band Abduction", reps: "15/side", video: "https://www.youtube.com/shorts/7Sph-K6Nmgc", noWeightInput: true },
+          { id: "sb6", name: "C2. Dead Bug",               reps: "8-10/side", video: "https://www.youtube.com/shorts/5c-vucY3beU", noWeightInput: true }
+        ]}
+      ]
+    },
+    {
+      id: "Strength C", category_title: "Resistance", workout_name: "Posterior Chain + Power",
+      meta: { total_blocks: 3, avg_time: "35-45 Mins" },
+      warm_up: [
+        { id: "wc_wu1", name: "90/90 Hip Rotations",      reps: "6/side",  video: "https://www.youtube.com/shorts/6dfkYZm9tpE" },
+        { id: "wc_wu2", name: "World's Greatest Stretch", reps: "3/side",  video: "https://www.youtube.com/watch?v=-CiWQ2IvY34" },
+        { id: "wc_wu3", name: "Banded Lateral Walks",     reps: "15/side", video: "https://www.youtube.com/watch?v=1LvxZrJFy9Y" },
+        { id: "wc_wu4", name: "Glute Bridge",             reps: "15",      video: "https://www.youtube.com/shorts/R1OXPHRqehw" }
+      ],
+      blocks: [
+        { block_name: "Block 1", exercises: [
+          { id: "sc1", name: "A1. KB Deadlift or Swing",              reps: "10-15",   video: "https://www.youtube.com/watch?v=1Qi0NQW89Oc" },
+          { id: "sc2", name: "A2. Heel-Elevated Squat (3s Eccentric)", reps: "8-10",  video: "https://www.youtube.com/shorts/aoJ6zmwV5VE" }
+        ]},
+        { block_name: "Block 2", exercises: [
+          { id: "sc3", name: "B1. Single-Arm Row",           reps: "10/side", video: "https://www.youtube.com/watch?v=ZRSGpBUVcNw" },
+          { id: "sc4", name: "B2. Push Press / Arnold Press", reps: "8-10",   video: "https://www.youtube.com/shorts/Kg8JD8l6ezw" }
+        ]},
+        { block_name: "Block 3", exercises: [
+          { id: "sc5", name: "C1. Frog Pumps",     reps: "20",          video: "https://www.youtube.com/watch?v=MQ62r2V7Lw8", noWeightInput: true },
+          { id: "sc6", name: "C2. Suitcase Carry", reps: "30-45 sec/side", video: "https://www.youtube.com/shorts/T5XLh0rXbxQ" }
+        ]}
+      ]
+    }
+  ],
+  cardio_sections: [
+    { id: "Cardio_Intervals", category_title: "Cardio", workout_name: "Bike Intervals",     recommended_time: "10-20 Mins",
+      instructions: ["Warm up 2 min easy pace", "10 rounds: 30 sec sprint / 60 sec easy", "Cool down 2 min easy pace"] },
+    { id: "Cardio_Steady",    category_title: "Cardio", workout_name: "Bike Steady / Mixed", recommended_time: "20-60 Mins",
+      instructions: ["Maintain a comfortable, conversational pace", "Option: alternate 5 min moderate / 5 min easy", "Focus on breathing and sustained effort"] }
+  ],
+  cool_down: {
+    id: "CoolDown", category_title: "Recovery", workout_name: "Cool-Down & Mobility",
+    routine: [
+      { id: "cd1", name: "Couch Stretch",             reps: "45 sec/side", video: "https://www.youtube.com/watch?v=ZAt7KE4AUNo" },
+      { id: "cd2", name: "Figure-4 Stretch",          reps: "45 sec/side", video: "https://www.youtube.com/watch?v=-g0nuyTHMrI" },
+      { id: "cd3", name: "Deep Squat Hold + Hip Pry", reps: "60 sec",      video: "https://www.youtube.com/shorts/Rw0ZpHx50D8" }
+    ]
+  }
+};
+
+// ====================================================================
+// STATE
+// ====================================================================
+const state = {
+  activeView: 'home',         // 'home' | 'detail' | 'history'
+  activeWorkout: null,
+  workoutType: null,          // 'resistance' | 'cooldown' | 'cardio'
+  completedExercises: new Set(),
+  pendingWeightLogs: {},      // { exerciseId: { weight, effort } }
+  openVideos: new Set(),
+  exerciseWeights: {},        // current session weights
+  workoutHistory: [],
+  weightLog: {},
+  confirmReset: false,
+  expandedExercises: new Set(),
+};
+
+// ====================================================================
+// STORAGE
+// ====================================================================
+function loadStorage() {
+  try { const h = localStorage.getItem('sweat_workout_history'); if (h) state.workoutHistory = JSON.parse(h); } catch(e) {}
+  try { const w = localStorage.getItem('sweat_weight_log');     if (w) state.weightLog     = JSON.parse(w); } catch(e) {}
+}
+
+// ====================================================================
+// WEIGHT LOG UTILS
+// ====================================================================
+function getLastLog(exerciseId) {
+  const entries = state.weightLog[exerciseId];
+  return entries && entries.length > 0 ? entries[0] : null;
+}
+function getSuggestedWeight(exerciseId) {
+  const last = getLastLog(exerciseId);
+  if (!last || last.weight <= 0) return null;
+  if (last.effort <= 2) return last.weight + 2.5;
+  if (last.effort === 3) return last.weight;
+  return Math.max(0, last.weight - 2.5);
+}
+
+// ====================================================================
+// ACTIONS
+// ====================================================================
+function openWorkout(workoutId, type) {
+  let workout;
+  if (type === 'resistance') {
+    workout = workoutProgram.resistance_sections.find(w => w.id === workoutId);
+  } else if (type === 'cooldown') {
+    workout = workoutProgram.cool_down;
+  } else if (type === 'cardio') {
+    workout = workoutProgram.cardio_sections.find(c => c.id === workoutId);
+  }
+  if (!workout) return;
+
+  // Init exercise weights from last log
+  const weights = {};
+  if (type === 'resistance') {
+    workout.blocks.forEach(b => b.exercises.forEach(ex => {
+      weights[ex.id] = getLastLog(ex.id)?.weight ?? 0;
+    }));
+  }
+
+  state.activeWorkout   = workout;
+  state.workoutType     = type;
+  state.completedExercises = new Set();
+  state.pendingWeightLogs  = {};
+  state.openVideos         = new Set();
+  state.exerciseWeights    = weights;
+  state.activeView         = 'detail';
+  render(); window.scrollTo(0, 0);
+}
+
+function goHome() {
+  state.activeView      = 'home';
+  state.activeWorkout   = null;
+  state.workoutType     = null;
+  state.completedExercises = new Set();
+  state.pendingWeightLogs  = {};
+  state.openVideos         = new Set();
+  state.exerciseWeights    = {};
+  render(); window.scrollTo(0, 0);
+}
+
+function openHistory() {
+  state.activeView         = 'history';
+  state.expandedExercises  = new Set();
+  state.confirmReset       = false;
+  render(); window.scrollTo(0, 0);
+}
+
+function toggleBlock(exerciseIds) {
+  const allDone = exerciseIds.every(id => state.completedExercises.has(id));
+  if (allDone) { exerciseIds.forEach(id => state.completedExercises.delete(id)); }
+  else         { exerciseIds.forEach(id => state.completedExercises.add(id)); }
+  render();
+}
+
+function finishWorkout() {
+  if (!state.activeWorkout) return;
+  const newEntry = {
+    workoutId:   state.activeWorkout.id || 'unknown',
+    workoutName: state.activeWorkout.workout_name,
+    completedAt: new Date().toISOString()
+  };
+  state.workoutHistory = [newEntry, ...state.workoutHistory];
+  localStorage.setItem('sweat_workout_history', JSON.stringify(state.workoutHistory));
+
+  const pending = Object.entries(state.pendingWeightLogs);
+  if (pending.length > 0) {
+    const now = new Date().toISOString();
+    pending.forEach(([id, { weight, effort }]) => {
+      const prev = state.weightLog[id] ?? [];
+      state.weightLog[id] = [{ date: now, weight, effort }, ...prev].slice(0, 30);
+    });
+    localStorage.setItem('sweat_weight_log', JSON.stringify(state.weightLog));
+  }
+  state.pendingWeightLogs  = {};
+  state.completedExercises = new Set();
+}
+
+function handleFinishWorkout() {
+  const duration = 3000, end = Date.now() + duration;
+  const frame = () => {
+    confetti({ particleCount: 5, angle: 60,  spread: 55, origin: { x: 0 }, colors: ['#EC008C','#00A79D','#FFFFFF'] });
+    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#EC008C','#00A79D','#FFFFFF'] });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  };
+  frame();
+  finishWorkout();
+  showToast('Workout Complete! 🎉', 'Great job crushing your session.');
+  setTimeout(goHome, 2000);
+}
+
+function isWorkoutCompleted(workoutId) {
+  const today = new Date().toDateString();
+  return state.workoutHistory.some(e => e.workoutId === workoutId && new Date(e.completedAt).toDateString() === today);
+}
+
+function handleReset() {
+  localStorage.removeItem('sweat_workout_history');
+  localStorage.removeItem('sweat_weight_log');
+  state.workoutHistory = [];
+  state.weightLog      = {};
+  state.confirmReset   = false;
+  render();
+}
+
+// ====================================================================
+// TOAST
+// ====================================================================
+function showToast(title, desc) {
+  const t = document.createElement('div');
+  t.className = 'fixed top-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-xl z-[200] text-center transition-all';
+  t.style.minWidth = '220px';
+  t.innerHTML = `<div class="font-bold text-sm">${title}</div><div class="text-xs text-gray-300 mt-0.5">${desc}</div>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ====================================================================
+// HELPERS
+// ====================================================================
+function getEmbedInfo(url) {
+  const isShort = url.includes('/shorts/');
+  let videoId = '';
+  if (isShort) { videoId = url.split('/shorts/')[1].split('?')[0]; }
+  else { const m = url.match(/[?&]v=([^&]+)/); videoId = m ? m[1] : ''; }
+  return { embedUrl: `https://www.youtube.com/embed/${videoId}`, isShort };
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso), today = new Date(), yest = new Date(today);
+  yest.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yest.toDateString())  return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+// ====================================================================
+// RENDER: HEADER
+// ====================================================================
+function renderHeader() {
+  return `
+    <div class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
+      <div class="px-5 py-4 flex items-center justify-between">
+        <button class="text-primary p-1">${icon('droplet','w-6 h-6 text-primary')}</button>
+        <div class="flex flex-col items-center">
+          <h1 class="text-primary font-black text-xl tracking-tighter leading-none">HEATHER'S WORKOUT</h1>
+          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mt-0.5">Weekly Plan</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+          ${icon('user','w-5 h-5')}
+        </button>
+      </div>
+    </div>`;
+}
+
+// ====================================================================
+// RENDER: BOTTOM NAV
+// ====================================================================
+function renderBottomNav() {
+  const items = [
+    { id:'workouts', ic:'dumbbell',    label:'Workouts',  active:true  },
+    { id:'food',     ic:'utensils',    label:'Food',      active:false },
+    { id:'planner',  ic:'calendar',    label:'Planner',   active:false },
+    { id:'progress', ic:'bar-chart-2', label:'Progress',  active:false },
+    { id:'community',ic:'users',       label:'Community', active:false },
+  ];
+  return `
+    <div class="fixed bottom-0 w-full max-w-[430px] bg-white border-t border-gray-100 px-2 py-2 pb-6 z-50">
+      <div class="flex justify-between items-center">
+        ${items.map(item => `
+          <button class="flex flex-col items-center flex-1 py-2 gap-1 ${item.active ? 'text-primary' : 'text-gray-400'}">
+            ${icon(item.ic, 'w-6 h-6')}
+            <span class="text-[10px] font-semibold">${item.label}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ====================================================================
+// RENDER: EXERCISE CARD
+// ====================================================================
+function renderExerciseCard(ex, showWeightTracker) {
+  const done       = state.completedExercises.has(ex.id);
+  const videoOpen  = state.openVideos.has(ex.id);
+  const pending    = state.pendingWeightLogs[ex.id];
+  const isRecorded = !!pending;
+  const effort     = pending?.effort ?? null;
+  const weight     = state.exerciseWeights[ex.id] ?? 0;
+  const suggested  = showWeightTracker && !ex.noWeightInput ? getSuggestedWeight(ex.id) : null;
+  const { embedUrl, isShort } = getEmbedInfo(ex.video);
+
+  const EFFORT_LABELS  = ['Too Easy','Easy','Good','Hard','Max'];
+  const EFFORT_ACTIVE  = [
+    'bg-teal-100 text-teal-700 border-teal-400',
+    'bg-green-100 text-green-700 border-green-400',
+    'bg-yellow-100 text-yellow-700 border-yellow-400',
+    'bg-orange-100 text-orange-700 border-orange-400',
+    'bg-red-100 text-red-700 border-red-400',
+  ];
+
+  let weightTrackerHtml = '';
+  if (showWeightTracker) {
+    const suggBadge = suggested !== null ? `
+      <div class="flex items-center gap-2 pt-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Suggested</span>
+        <span class="text-xs font-black text-secondary px-2 py-0.5 rounded-full" style="background-color:rgba(0,167,157,0.1)">${Number.isInteger(suggested) ? suggested : suggested.toFixed(1)} lbs</span>
+        <span class="text-[10px] text-gray-300">based on last session</span>
+      </div>` : '';
+
+    const weightRow = !ex.noWeightInput ? `
+      ${suggBadge}
+      <div class="flex items-center gap-3">
+        ${icon('dumbbell','w-4 h-4 text-gray-400 shrink-0')}
+        <div class="flex items-center gap-2">
+          <button data-action="adjust-weight" data-exercise-id="${ex.id}" data-delta="-2.5"
+            class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold text-base flex items-center justify-center active:scale-95 transition-transform">−</button>
+          <div class="text-center w-20" id="weight-display-${ex.id}">
+            <span class="font-black text-gray-900 text-base">${Number.isInteger(weight) ? weight : weight.toFixed(1)}</span>
+            <span class="text-xs text-gray-400 ml-1">lbs</span>
+          </div>
+          <button data-action="adjust-weight" data-exercise-id="${ex.id}" data-delta="2.5"
+            class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold text-base flex items-center justify-center active:scale-95 transition-transform">+</button>
+        </div>
+        <span id="saved-badge-${ex.id}" class="ml-auto text-xs font-bold text-secondary flex items-center gap-1 ${isRecorded ? '' : 'hidden'}">
+          ${icon('check','w-3.5 h-3.5')} Saved
+        </span>
+      </div>` : '';
+
+    const effortBtns = EFFORT_LABELS.map((label, i) => {
+      const val = i + 1;
+      const sel = effort === val;
+      return `<button data-action="select-effort" data-exercise-id="${ex.id}" data-effort="${val}" data-no-weight="${ex.noWeightInput ? '1' : '0'}"
+        title="${label}"
+        class="effort-btn flex-1 h-9 rounded-lg text-xs font-bold border-2 transition-all active:scale-95 ${sel ? EFFORT_ACTIVE[i] + ' scale-105 shadow-sm' : 'bg-gray-50 text-gray-400 border-transparent'}"
+        data-effort-active-class="${EFFORT_ACTIVE[i]}"
+      >${val}</button>`;
+    }).join('');
+
+    const savedNoWeight = ex.noWeightInput ? `
+      <span id="saved-badge-${ex.id}" class="text-xs font-bold text-secondary flex items-center gap-1 ${isRecorded ? '' : 'hidden'}">
+        ${icon('check','w-3.5 h-3.5')} Saved
+      </span>` : '';
+
+    weightTrackerHtml = `
+      <div class="px-4 pb-4 pt-1 border-t border-gray-100 space-y-3">
+        ${weightRow}
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">How hard was it?</p>
+            ${savedNoWeight}
+          </div>
+          <div class="flex gap-1.5" id="effort-row-${ex.id}">${effortBtns}</div>
+          <div class="flex justify-between text-[9px] text-gray-300 font-semibold px-0.5">
+            <span>Too Easy</span><span>Max Effort</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const videoHtml = videoOpen ? `
+    <div class="w-full ${isShort ? 'max-h-96' : ''}" style="${isShort ? 'aspect-ratio:9/16' : 'aspect-ratio:16/9'}">
+      <iframe src="${embedUrl}?autoplay=1&rel=0&modestbranding=1" class="w-full h-full"
+        allow="autoplay; encrypted-media; fullscreen" allowfullscreen title="${ex.name}"></iframe>
+    </div>` : '';
+
+  return `
+    <div class="bg-white rounded-xl shadow-card border border-gray-50 overflow-hidden" id="card-${ex.id}">
+      <div class="p-4 flex items-center justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <h4 class="font-bold text-sm mb-1 transition-colors ${done ? 'text-gray-400 line-through' : 'text-primary'}">${ex.name}</h4>
+          <p class="text-xs text-gray-400 font-semibold">${ex.reps}</p>
+        </div>
+        <button data-action="toggle-video" data-exercise-id="${ex.id}"
+          class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${videoOpen ? 'bg-primary text-white' : 'text-primary'}"
+          style="${videoOpen ? '' : 'background-color:rgba(236,0,140,0.1)'}">
+          ${videoOpen ? icon('x','w-4 h-4') : icon('play','w-4 h-4 fill-current ml-0.5')}
+        </button>
+      </div>
+      ${weightTrackerHtml}
+      ${videoHtml}
+    </div>`;
+}
+
+// ====================================================================
+// RENDER: BLOCK CHECK BUTTON
+// ====================================================================
+function renderBlockCheck(exerciseIds) {
+  const allDone  = exerciseIds.length > 0 && exerciseIds.every(id => state.completedExercises.has(id));
+  const idsJson  = JSON.stringify(exerciseIds);
+  return `
+    <button data-action="toggle-block" data-exercise-ids='${idsJson}'
+      class="w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${allDone ? 'text-white shadow-md scale-110' : 'border-2 border-gray-200 text-gray-300'}"
+      style="${allDone ? 'background-color:#EC008C' : ''}">
+      ${icon('check', 'w-5 h-5')}
+    </button>`;
+}
+
+// ====================================================================
+// RENDER: PROGRESS BAR CALC
+// ====================================================================
+function getProgress() {
+  const w = state.activeWorkout;
+  if (!w) return 0;
+  let allBlocks = [];
+  if (state.workoutType === 'resistance') {
+    allBlocks = [w.warm_up.map(e => e.id), ...w.blocks.map(b => b.exercises.map(e => e.id))];
+  } else if (state.workoutType === 'cooldown') {
+    allBlocks = [w.routine.map(e => e.id)];
+  }
+  if (allBlocks.length === 0) return 0;
+  const done = allBlocks.filter(ids => ids.length > 0 && ids.every(id => state.completedExercises.has(id))).length;
+  return (done / allBlocks.length) * 100;
+}
+
+// ====================================================================
+// RENDER: HOME
+// ====================================================================
+function renderHome() {
+  const { weekSchedule, cool_down } = workoutProgram;
+
+  const daysHtml = weekSchedule.map(day => {
+    const completed = !day.isRest && isWorkoutCompleted(day.workoutId);
+    const isClickable = !day.isRest;
+    let iconHtml, nameColor, accentColor;
+    if (day.isRest) {
+      iconHtml = icon('moon','w-5 h-5 text-gray-300'); nameColor = 'text-gray-400'; accentColor = 'border-gray-100';
+    } else if (day.type === 'cardio') {
+      iconHtml = icon('bike','w-5 h-5 text-secondary'); nameColor = 'text-secondary'; accentColor = 'border-secondary';
+    } else {
+      iconHtml = icon('dumbbell','w-5 h-5 text-primary'); nameColor = 'text-primary'; accentColor = 'border-primary';
+    }
+    return `
+      <div ${isClickable ? `data-action="open-workout" data-workout-id="${day.workoutId}" data-workout-type="${day.type}"` : ''}
+        class="flex items-center bg-white rounded-xl shadow-app border-b-2 ${accentColor} overflow-hidden ${isClickable ? 'cursor-pointer active:scale-[0.98] transition-transform' : 'opacity-60'}">
+        <div class="flex flex-col items-center justify-center w-16 py-4 shrink-0 border-r border-gray-100">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">${day.day}</span>
+        </div>
+        <div class="flex-1 px-4 py-3">
+          <div class="flex items-center gap-2">
+            ${iconHtml}
+            <span class="text-base font-bold ${nameColor}">${day.workoutName}</span>
+            ${completed ? `<span class="ml-auto">${icon('check-circle-2','w-4 h-4 text-primary')}</span>` : ''}
+          </div>
+          ${day.meta ? `<p class="text-xs text-gray-400 font-medium mt-0.5 ml-7">${day.meta}</p>` : ''}
+          ${day.isRest ? `<p class="text-xs text-gray-300 font-medium mt-0.5 ml-7">Recovery day</p>` : ''}
+        </div>
+        ${isClickable ? `<div class="pr-4">${icon('chevron-right','w-4 h-4 text-gray-300')}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="flex flex-col w-full pb-24 min-h-screen bg-gray-50">
+      ${renderHeader()}
+      <div class="px-5 py-6">
+        <div class="space-y-3 mb-8">${daysHtml}</div>
+
+        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Recovery</h2>
+        <div data-action="open-workout" data-workout-id="CoolDown" data-workout-type="cooldown"
+          class="bg-white rounded-xl p-5 shadow-app border-b-2 border-gray-800 cursor-pointer active:scale-[0.98] transition-transform">
+          <div class="flex justify-between items-center mb-1">
+            <h3 class="text-base font-bold text-gray-800">${cool_down.workout_name}</h3>
+            ${icon('chevron-right','w-5 h-5 text-gray-400')}
+          </div>
+          <p class="text-xs text-gray-400 font-medium">${cool_down.routine.length} exercises · Mobility focus</p>
+        </div>
+
+        <div class="mt-6 mb-2">
+          <button data-action="open-history"
+            class="w-full bg-white rounded-xl p-4 shadow-app border-b-2 border-secondary flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background-color:rgba(0,167,157,0.1)">
+              ${icon('trending-up','w-5 h-5 text-secondary')}
+            </div>
+            <div class="flex-1 text-left">
+              <p class="font-bold text-gray-800">Progress & History</p>
+              <p class="text-xs text-gray-400 font-medium">Weight logs · Past sessions</p>
+            </div>
+            ${icon('chevron-right','w-4 h-4 text-gray-300')}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderBottomNav()}`;
+}
+
+// ====================================================================
+// RENDER: WORKOUT DETAIL (resistance + cooldown + cardio)
+// ====================================================================
+function renderWorkoutDetail() {
+  const w    = state.activeWorkout;
+  const type = state.workoutType;
+  if (!w) return '';
+
+  const progress = getProgress();
+
+  // ── CARDIO ──────────────────────────────────────────────────────────
+  if (type === 'cardio') {
+    const steps = w.instructions.map((s,i) => `
+      <div class="flex gap-3 items-start">
+        <span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-black text-white mt-0.5" style="background-color:#00A79D">${i+1}</span>
+        <p class="text-sm text-gray-700 font-medium pt-0.5">${s}</p>
+      </div>`).join('');
+
+    return `
+      <div class="flex flex-col w-full min-h-screen bg-gray-50 pb-28">
+        <div class="sticky top-0 z-40 bg-white shadow-sm">
+          <div class="flex items-center px-4 h-16 relative">
+            <button data-action="go-home" class="w-10 h-10 flex items-center justify-center text-gray-500 absolute left-2">${icon('arrow-left','w-6 h-6')}</button>
+            <div class="w-full text-center px-10">
+              <h2 class="font-bold text-gray-900">${w.workout_name}</h2>
+              <p class="text-[10px] uppercase font-bold text-gray-400">${w.category_title}</p>
+            </div>
+          </div>
+        </div>
+        <div class="px-5 py-6 space-y-6">
+          <div class="bg-white rounded-xl p-5 shadow-app text-center">
+            ${icon('bike','w-10 h-10 text-secondary mx-auto mb-3')}
+            <p class="font-black text-gray-900 text-lg">${w.workout_name}</p>
+            <p class="text-sm text-gray-400 mt-1">Recommended: <span class="font-bold text-secondary">${w.recommended_time}</span></p>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-app space-y-4">
+            <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Structure</h3>
+            ${steps}
+          </div>
+        </div>
+        <div class="fixed bottom-0 w-full max-w-[430px] p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
+          <button data-action="finish-workout"
+            class="w-full text-white font-bold text-lg py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style="background-color:#EC008C">
+            ${icon('check-circle-2','w-6 h-6')} FINISH WORKOUT
+          </button>
+        </div>
+      </div>`;
+  }
+
+  // ── RESISTANCE ──────────────────────────────────────────────────────
+  if (type === 'resistance') {
+    const warmUpIds = w.warm_up.map(e => e.id);
+    const warmUpCards = w.warm_up.map(ex => renderExerciseCard(ex, false)).join('');
+    const blocksHtml = w.blocks.map(block => {
+      const blockIds = block.exercises.map(e => e.id);
+      const cards    = block.exercises.map(ex => renderExerciseCard(ex, true)).join('');
+      return `
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <h3 class="font-black text-gray-900 uppercase tracking-tight">${block.block_name}</h3>
+              <span class="text-xs font-bold px-3 py-1 rounded-full text-primary" style="background-color:rgba(236,0,140,0.1)">3 ROUNDS</span>
+            </div>
+            ${renderBlockCheck(blockIds)}
+          </div>
+          <div class="space-y-3">${cards}</div>
+        </section>`;
+    }).join('');
+
+    return `
+      <div class="flex flex-col w-full min-h-screen bg-gray-50 pb-28">
+        <div class="sticky top-0 z-40 bg-white shadow-sm">
+          <div class="flex items-center px-4 h-16 relative">
+            <button data-action="go-home" class="w-10 h-10 flex items-center justify-center text-gray-500 absolute left-2">${icon('arrow-left','w-6 h-6')}</button>
+            <div class="w-full text-center px-10">
+              <h2 class="font-bold text-gray-900 truncate">${w.workout_name}</h2>
+              <p class="text-[10px] uppercase font-bold text-gray-400">${w.category_title}</p>
+            </div>
+          </div>
+          <div class="w-full h-1.5 bg-gray-100">
+            <div class="h-full transition-all duration-500 ease-out" style="width:${progress}%;background-color:#EC008C"></div>
+          </div>
+        </div>
+        <div class="px-5 py-6 space-y-8">
+          <section>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-black text-gray-900 uppercase tracking-tight">Warm Up</h3>
+              ${renderBlockCheck(warmUpIds)}
+            </div>
+            <div class="space-y-3">${warmUpCards}</div>
+          </section>
+          ${blocksHtml}
+        </div>
+        <div class="fixed bottom-0 w-full max-w-[430px] p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
+          <button data-action="finish-workout"
+            class="w-full text-white font-bold text-lg py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style="background-color:#EC008C">
+            ${icon('check-circle-2','w-6 h-6')} FINISH WORKOUT
+          </button>
+        </div>
+      </div>`;
+  }
+
+  // ── COOL DOWN ───────────────────────────────────────────────────────
+  const routineIds  = w.routine.map(e => e.id);
+  const routineCards = w.routine.map(ex => renderExerciseCard(ex, false)).join('');
+  return `
+    <div class="flex flex-col w-full min-h-screen bg-gray-50 pb-28">
+      <div class="sticky top-0 z-40 bg-white shadow-sm">
+        <div class="flex items-center px-4 h-16 relative">
+          <button data-action="go-home" class="w-10 h-10 flex items-center justify-center text-gray-500 absolute left-2">${icon('arrow-left','w-6 h-6')}</button>
+          <div class="w-full text-center px-10">
+            <h2 class="font-bold text-gray-900">${w.workout_name}</h2>
+            <p class="text-[10px] uppercase font-bold text-gray-400">${w.category_title}</p>
+          </div>
+        </div>
+        <div class="w-full h-1.5 bg-gray-100">
+          <div class="h-full transition-all duration-500" style="width:${progress}%;background-color:#EC008C"></div>
+        </div>
+      </div>
+      <div class="px-5 py-6 space-y-8">
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-black text-gray-900 uppercase tracking-tight">Mobility Routine</h3>
+            ${renderBlockCheck(routineIds)}
+          </div>
+          <div class="space-y-3">${routineCards}</div>
+        </section>
+      </div>
+      <div class="fixed bottom-0 w-full max-w-[430px] p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
+        <button data-action="finish-workout"
+          class="w-full text-white font-bold text-lg py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          style="background-color:#EC008C">
+          ${icon('check-circle-2','w-6 h-6')} FINISH WORKOUT
+        </button>
+      </div>
+    </div>`;
+}
+
+// ====================================================================
+// RENDER: HISTORY
+// ====================================================================
+function buildExerciseMap() {
+  const map = {};
+  workoutProgram.resistance_sections.forEach(s => {
+    s.warm_up.forEach(ex     => { map[ex.id] = { name: ex.name, workoutName: s.workout_name, noWeightInput: !!ex.noWeightInput }; });
+    s.blocks.forEach(b => b.exercises.forEach(ex => { map[ex.id] = { name: ex.name, workoutName: s.workout_name, noWeightInput: !!ex.noWeightInput }; }));
+  });
+  workoutProgram.cool_down.routine.forEach(ex => { map[ex.id] = { name: ex.name, workoutName: workoutProgram.cool_down.workout_name, noWeightInput: true }; });
+  return map;
+}
+
+const EFFORT_LABELS_MAP = { 1:'Too Easy', 2:'Easy', 3:'Good', 4:'Hard', 5:'Max' };
+const EFFORT_PILL_MAP   = { 1:'bg-teal-100 text-teal-700', 2:'bg-green-100 text-green-700', 3:'bg-yellow-100 text-yellow-700', 4:'bg-orange-100 text-orange-700', 5:'bg-red-100 text-red-700' };
+
+function renderHistory() {
+  const exerciseMap = buildExerciseMap();
+
+  // Sessions
+  const sessions = state.workoutHistory;
+  const sessionsHtml = sessions.length === 0
+    ? `<p class="text-sm text-gray-400 text-center py-6">No completed sessions yet.<br>Finish a workout to see it here.</p>`
+    : sessions.slice(0, 30).map(s => `
+        <div class="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="font-bold text-sm text-gray-900">${s.workoutName}</p>
+            <p class="text-xs text-gray-400">${fmtDate(s.completedAt)} · ${fmtTime(s.completedAt)}</p>
+          </div>
+          <span class="w-2 h-2 rounded-full shrink-0" style="background-color:#EC008C"></span>
+        </div>`).join('');
+
+  // Weight progress
+  const logOrder = ['Full Body (Hinge + Squat)', 'Unilateral + Abductors', 'Posterior Chain + Power'];
+  const loggedExercises = Object.entries(state.weightLog)
+    .filter(([,e]) => e.length > 0)
+    .map(([id, entries]) => ({ id, entries, meta: exerciseMap[id] }))
+    .filter(item => item.meta)
+    .sort((a,b) => logOrder.indexOf(a.meta.workoutName) - logOrder.indexOf(b.meta.workoutName));
+
+  const progressHtml = loggedExercises.length === 0
+    ? `<p class="text-sm text-gray-400 text-center py-6">No weight data yet.<br>Log weights during a workout to track progress.</p>`
+    : loggedExercises.map(({ id, entries, meta }) => {
+        const latest   = entries[0];
+        const expanded = state.expandedExercises.has(id);
+
+        // Trend
+        const weighted = entries.filter(e => e.weight > 0);
+        let trendHtml = '';
+        if (!meta.noWeightInput && weighted.length >= 2) {
+          const diff = weighted[0].weight - weighted[weighted.length-1].weight;
+          if (diff !== 0) {
+            const up = diff > 0;
+            trendHtml = `<span class="text-[10px] font-bold flex items-center gap-0.5 ${up?'text-green-600':'text-orange-600'}">
+              ${icon('trending-up','w-3 h-3 ' + (up?'':'rotate-180'))}
+              ${up?'+':''}${diff%1===0?diff:diff.toFixed(1)} lbs overall
+            </span>`;
+          }
+        }
+
+        const rowsHtml = expanded ? `
+          <div class="border-t border-gray-50 px-4 pb-3">
+            <table class="w-full text-xs">
+              <thead><tr class="text-[10px] text-gray-400 uppercase tracking-wider">
+                <th class="text-left py-2 font-bold">Date</th>
+                ${!meta.noWeightInput ? '<th class="text-right py-2 font-bold">Weight</th>' : ''}
+                <th class="text-right py-2 font-bold">Effort</th>
+              </tr></thead>
+              <tbody class="divide-y divide-gray-50">
+                ${entries.map((e,i) => `
+                  <tr class="${i===0?'font-bold':''}">
+                    <td class="py-2 text-gray-600">${fmtDate(e.date)}<span class="text-gray-300 ml-1">${fmtTime(e.date)}</span></td>
+                    ${!meta.noWeightInput ? `<td class="py-2 text-right text-gray-800">${e.weight>0?(e.weight%1===0?e.weight:e.weight.toFixed(1))+' lbs':'—'}</td>` : ''}
+                    <td class="py-2 text-right"><span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold ${EFFORT_PILL_MAP[e.effort]||'bg-gray-100 text-gray-500'}">${EFFORT_LABELS_MAP[e.effort]||e.effort}</span></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>` : '';
+
+        return `
+          <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <button class="w-full p-4 text-left flex items-start gap-3" data-action="toggle-exercise-history" data-exercise-id="${id}">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background-color:${meta.noWeightInput?'rgba(0,167,157,0.1)':'rgba(236,0,140,0.1)'}">
+                ${icon('dumbbell','w-4 h-4 ' + (meta.noWeightInput?'text-secondary':'text-primary'))}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm text-gray-900 truncate">${meta.name}</p>
+                <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide mb-1">${meta.workoutName}</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  ${!meta.noWeightInput && latest.weight > 0 ? `<span class="text-xs font-black text-primary">${latest.weight%1===0?latest.weight:latest.weight.toFixed(1)} lbs</span>` : ''}
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ${EFFORT_PILL_MAP[latest.effort]||'bg-gray-100 text-gray-500'}">${EFFORT_LABELS_MAP[latest.effort]||latest.effort}</span>
+                  <span class="text-[10px] text-gray-300">${fmtDate(latest.date)}</span>
+                  ${trendHtml}
+                </div>
+              </div>
+              <div class="text-gray-300 shrink-0 mt-1">${expanded ? icon('chevron-up','w-4 h-4') : icon('chevron-down','w-4 h-4')}</div>
+            </button>
+            ${rowsHtml}
+          </div>`;
+      }).join('');
+
+  // Reset section
+  const resetHtml = state.confirmReset ? `
+    <div class="rounded-xl p-5 space-y-4 border border-red-200" style="background-color:#fef2f2">
+      <div class="flex items-start gap-3">
+        ${icon('alert-triangle','w-5 h-5 text-red-500 shrink-0 mt-0.5')}
+        <div>
+          <p class="font-bold text-red-700 text-sm">Reset all progress?</p>
+          <p class="text-xs text-red-500 mt-0.5">This will permanently delete all sessions, weight logs, and suggested weights. This cannot be undone.</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button data-action="cancel-reset" class="flex-1 py-2.5 rounded-lg bg-white border border-gray-200 text-sm font-bold text-gray-600">Cancel</button>
+        <button data-action="do-reset"     class="flex-1 py-2.5 rounded-lg text-white text-sm font-bold" style="background-color:#ef4444">Yes, Reset</button>
+      </div>
+    </div>` : `
+    <button data-action="confirm-reset"
+      class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold">
+      ${icon('trash2','w-4 h-4')} Reset All Data
+    </button>`;
+
+  return `
+    <div class="flex flex-col w-full min-h-screen bg-gray-50 pb-10">
+      <div class="sticky top-0 z-40 bg-white shadow-sm">
+        <div class="flex items-center px-4 h-16 relative">
+          <button data-action="go-home" class="w-10 h-10 flex items-center justify-center text-gray-500 absolute left-2">${icon('arrow-left','w-6 h-6')}</button>
+          <div class="w-full text-center px-10">
+            <h2 class="font-bold text-gray-900">Progress</h2>
+            <p class="text-[10px] uppercase font-bold text-gray-400">Workout History</p>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-6 space-y-8">
+        <section>
+          <div class="flex items-center gap-2 mb-4">
+            ${icon('calendar-days','w-4 h-4 text-primary')}
+            <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Sessions</h3>
+          </div>
+          <div class="space-y-2">${sessionsHtml}</div>
+        </section>
+        <section>
+          <div class="flex items-center gap-2 mb-4">
+            ${icon('trending-up','w-4 h-4 text-secondary')}
+            <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Weight Progress</h3>
+          </div>
+          <div class="space-y-2">${progressHtml}</div>
+        </section>
+        <section class="pt-2">${resetHtml}</section>
+      </div>
+    </div>`;
+}
+
+// ====================================================================
+// MAIN RENDER
+// ====================================================================
+function render() {
+  const app = document.getElementById('app');
+  let html = '';
+  if (state.activeView === 'home')    html = renderHome();
+  else if (state.activeView === 'detail')  html = renderWorkoutDetail();
+  else if (state.activeView === 'history') html = renderHistory();
+
+  app.innerHTML = `
+    <div class="min-h-screen w-full flex justify-center" style="background-color:#d1d5db">
+      <div class="w-full max-w-[430px] bg-white relative shadow-2xl overflow-x-hidden min-h-[100dvh]">
+        ${html}
+      </div>
+    </div>`;
+}
+
+// ====================================================================
+// EVENT HANDLING
+// ====================================================================
+document.getElementById('app').addEventListener('click', function(e) {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+
+  if (action === 'open-workout') {
+    const id   = el.dataset.workoutId;
+    const type = el.dataset.workoutType;
+    openWorkout(id, type);
+  }
+  else if (action === 'go-home')    { goHome(); }
+  else if (action === 'open-history') { openHistory(); }
+  else if (action === 'open-cooldown') { openWorkout('CoolDown', 'cooldown'); }
+
+  else if (action === 'toggle-block') {
+    const ids = JSON.parse(el.dataset.exerciseIds);
+    toggleBlock(ids);
+  }
+
+  else if (action === 'finish-workout') { handleFinishWorkout(); }
+
+  else if (action === 'toggle-video') {
+    const id = el.dataset.exerciseId;
+    if (state.openVideos.has(id)) { state.openVideos.delete(id); }
+    else                          { state.openVideos.add(id); }
+    render();
+  }
+
+  else if (action === 'adjust-weight') {
+    const id    = el.dataset.exerciseId;
+    const delta = parseFloat(el.dataset.delta);
+    const prev  = state.exerciseWeights[id] ?? 0;
+    const next  = parseFloat(Math.max(0, prev + delta).toFixed(1));
+    state.exerciseWeights[id] = next;
+    // Direct DOM update
+    const disp = document.getElementById(`weight-display-${id}`);
+    if (disp) {
+      disp.innerHTML = `<span class="font-black text-gray-900 text-base">${Number.isInteger(next)?next:next.toFixed(1)}</span><span class="text-xs text-gray-400 ml-1">lbs</span>`;
+    }
+  }
+
+  else if (action === 'select-effort') {
+    const id         = el.dataset.exerciseId;
+    const effortVal  = parseInt(el.dataset.effort);
+    const noWeight   = el.dataset.noWeight === '1';
+    const weight     = noWeight ? 0 : (state.exerciseWeights[id] ?? 0);
+    if (!noWeight && weight <= 0) return;
+
+    state.pendingWeightLogs[id] = { weight, effort: effortVal };
+
+    // Direct DOM update for effort buttons
+    const row = document.getElementById(`effort-row-${id}`);
+    if (row) {
+      const EFFORT_ACTIVE = [
+        'bg-teal-100 text-teal-700 border-teal-400',
+        'bg-green-100 text-green-700 border-green-400',
+        'bg-yellow-100 text-yellow-700 border-yellow-400',
+        'bg-orange-100 text-orange-700 border-orange-400',
+        'bg-red-100 text-red-700 border-red-400',
+      ];
+      row.querySelectorAll('[data-action="select-effort"]').forEach((btn, i) => {
+        const val = i + 1;
+        if (val === effortVal) {
+          btn.className = btn.className.replace(/bg-\S+\s?|text-\S+\s?|border-\S+\s?/g, '').trim();
+          btn.className = `effort-btn flex-1 h-9 rounded-lg text-xs font-bold border-2 transition-all active:scale-95 scale-105 shadow-sm ${EFFORT_ACTIVE[i]}`;
+        } else {
+          btn.className = 'effort-btn flex-1 h-9 rounded-lg text-xs font-bold border-2 transition-all active:scale-95 bg-gray-50 text-gray-400 border-transparent';
+        }
+      });
+    }
+    // Show saved badge
+    const badge = document.getElementById(`saved-badge-${id}`);
+    if (badge) badge.classList.remove('hidden');
+  }
+
+  else if (action === 'toggle-exercise-history') {
+    const id = el.dataset.exerciseId;
+    if (state.expandedExercises.has(id)) { state.expandedExercises.delete(id); }
+    else                                  { state.expandedExercises.add(id); }
+    render();
+  }
+
+  else if (action === 'confirm-reset') { state.confirmReset = true;  render(); }
+  else if (action === 'cancel-reset')  { state.confirmReset = false; render(); }
+  else if (action === 'do-reset')      { handleReset(); }
+});
+
+// ====================================================================
+// INIT
+// ====================================================================
+loadStorage();
+render();
+</script>
+</body>
+</html>
