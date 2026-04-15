@@ -532,7 +532,7 @@ function renderTopNav() {
     <div class="desk-nav" style="display:none;position:sticky;top:0;z-index:100;background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset;width:100%">
       <div style="max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 40px;gap:48px">
         <button data-action="go-home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0">
-          <div style="width:32px;height:32px;border-radius:8px;background:#F5C300;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="width:32px;height:32px;border-radius:8px;background:#2D6A4F;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             ${icon('dumbbell','w-4 h-4 text-gray-900')}
           </div>
           <span style="font-size:15px;font-weight:900;color:#ffffff;letter-spacing:-.01em">HEATHER'S WORKOUT</span>
@@ -639,7 +639,7 @@ function renderHome() {
         <div class="px-5 flex items-center justify-between" style="padding-top:28px;padding-bottom:28px">
           <\!-- PWA-style logo + title -->
           <button data-action="go-home" class="flex items-center gap-3" style="background:none;border:none;cursor:pointer;padding:0">
-            <img src="${window._appIcon||''}" style="width:44px;height:44px;border-radius:11px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+            <img src="${window._appIcon||''}" style="width:54px;height:54px;flex-shrink:0" alt="logo">
             <span style="font-size:18px;font-weight:900;color:#ffffff;letter-spacing:.01em">HEATHER'S WORKOUT</span>
           </button>
           <\!-- Desktop nav tabs (hidden on mobile) -->
@@ -882,7 +882,7 @@ function renderPlanner(){
     <div class="flex flex-col w-full min-h-screen pb-28" style="background:#FEFCE8">
       <div class="sticky top-0 z-40" style="background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset">
         <div class="px-4 flex items-center gap-3" style="padding-top:28px;padding-bottom:28px">
-          <img src="${window._appIcon||''}" style="width:42px;height:42px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+          <img src="${window._appIcon||''}" style="width:50px;height:50px;flex-shrink:0" alt="logo">
           <h2 class="font-black" style="font-size:18px;font-weight:900;line-height:1.2;color:#ffffff;flex:1">Weekly Planner</h2>
           <button data-action="go-home" class="flex items-center gap-2 rounded-full px-4 py-2" style="color:#ffffff;background:rgba(255,255,255,0.2);border:none;cursor:pointer;white-space:nowrap">
             ${icon('arrow-left','w-4 h-4')}
@@ -963,7 +963,7 @@ function renderProgress(){
     <div class="flex flex-col w-full min-h-screen pb-28" style="background:#FEFCE8">
       <div class="sticky top-0 z-40" style="background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset">
         <div class="px-4 flex items-center gap-3" style="padding-top:28px;padding-bottom:28px">
-          <img src="${window._appIcon||''}" style="width:42px;height:42px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+          <img src="${window._appIcon||''}" style="width:50px;height:50px;flex-shrink:0" alt="logo">
           <h2 class="font-black" style="font-size:18px;font-weight:900;line-height:1.2;color:#ffffff;flex:1">Progress</h2>
           <button data-action="go-home" class="flex items-center gap-2 rounded-full px-4 py-2" style="color:#ffffff;background:rgba(255,255,255,0.2);border:none;cursor:pointer;white-space:nowrap">
             ${icon('arrow-left','w-4 h-4')}
@@ -1165,18 +1165,21 @@ function generateAppIcon(size) {
   const ctx = c.getContext('2d');
   const s = size / 180;
 
-  // Dark background
-  ctx.fillStyle = '#111827';
+  // Green background
+  ctx.fillStyle = '#2D6A4F';
   ctx.fillRect(0, 0, size, size);
 
-  // Yellow circle
-  ctx.fillStyle = '#F5C300';
+  // Yellow circle with thin black outline
   ctx.beginPath();
   ctx.arc(size/2, size/2, 64*s, 0, Math.PI*2);
+  ctx.fillStyle = '#F5C300';
   ctx.fill();
-
-  // Dumbbell shape (dark, centered)
   ctx.strokeStyle = '#111827';
+  ctx.lineWidth = 1.5*s;
+  ctx.stroke();
+
+  // Dumbbell shape (green, centered)
+  ctx.strokeStyle = '#2D6A4F';
   ctx.lineCap = 'round';
 
   // Bar
