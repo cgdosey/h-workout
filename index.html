@@ -167,6 +167,10 @@
     .workout-card::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.35) 100%); pointer-events:none; }
     .star-btn { background: none; border: none; cursor: pointer; padding: 2px; font-size: 28px; line-height: 1; transition: transform .15s; }
     .star-btn:active { transform: scale(1.3); }
+    /* Remove number input spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+    input[type=number] { -moz-appearance:textfield; appearance:textfield; }
 
     /* ── Desktop (640px+) ─────────────────────────────── */
     @media (min-width:640px){
@@ -525,17 +529,17 @@ function renderTopNav() {
     {label:'Progress',action:'open-progress',active:v==='progress'},
   ];
   return `
-    <div class="desk-nav" style="display:none;position:sticky;top:0;z-index:100;background:white;border-bottom:1px solid #e5e7eb;width:100%">
-      <div style="max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px">
+    <div class="desk-nav" style="display:none;position:sticky;top:0;z-index:100;background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset;width:100%">
+      <div style="max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 40px;gap:48px">
         <button data-action="go-home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0">
           <div style="width:32px;height:32px;border-radius:8px;background:#F5C300;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             ${icon('dumbbell','w-4 h-4 text-gray-900')}
           </div>
-          <span style="font-size:15px;font-weight:900;color:#111827;letter-spacing:-.01em">HEATHER'S WORKOUT</span>
+          <span style="font-size:15px;font-weight:900;color:#ffffff;letter-spacing:-.01em">HEATHER'S WORKOUT</span>
         </button>
         <div style="display:flex;gap:4px">
           ${items.map(it=>`
-            <button data-action="${it.action}" style="padding:8px 18px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;background:${it.active?'#F5C300':'transparent'};color:${it.active?'#111827':'#6b7280'}">
+            <button data-action="${it.action}" style="padding:8px 18px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;background:${it.active?'rgba(255,255,255,0.9)':'transparent'};color:${it.active?'#2D6A4F':'rgba(255,255,255,0.75)'}">
               ${it.label}
             </button>`).join('')}
         </div>
@@ -557,12 +561,14 @@ function renderCalendarStrip() {
         const completed=!day.isRest&&isWorkoutCompleted(day.workoutId);
         const dayDate=new Date(startOfWeek); dayDate.setDate(startOfWeek.getDate()+i);
         const dateNum=dayDate.getDate();
+        const todayBg=day.type==='cardio'?'#00A79D':'#F5C300';
+        const todayFg=day.type==='cardio'?'#ffffff':'#111827';
         const dotColor=!day.isRest?(day.type==='cardio'?'#00A79D':'#F5C300'):'transparent';
         return `
           <div class="flex flex-col items-center gap-1 flex-1">
-            <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${isToday?'#111827':'#9ca3af'}">${day.day}</span>
-            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="font-size:14px;font-weight:700;${isToday?'background:#F5C300;color:#111827':'color:#6b7280'}">
-              ${completed?`<svg class="w-4 h-4" style="color:${isToday?'#111':'#F5C300'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17 4 12"/></svg>`:dateNum}
+            <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#374151">${day.day}</span>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="font-size:14px;font-weight:700;${isToday?'background:'+todayBg+';color:'+todayFg:'color:#374151'}">
+              ${completed?'<svg class="w-4 h-4" style="color:'+(isToday?todayFg:'#2D6A4F')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17 4 12"/></svg>':dateNum}
             </div>
             <div class="w-1.5 h-1.5 rounded-full" style="background-color:${dotColor}"></div>
           </div>`;
@@ -612,7 +618,7 @@ function renderHome() {
     const icn=todayDay.type==='cardio'?icon('bike','w-5 h-5'):icon('dumbbell','w-5 h-5');
     const done=isWorkoutCompleted(todayDay.workoutId);
     todayBanner=`
-      <div class="px-5 mb-6">
+      <div class="mb-6">
         <p style="font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Today's Workout</p>
         <div data-action="open-workout" data-workout-id="${todayDay.workoutId}" data-workout-type="${todayDay.type}"
           class="workout-card cursor-pointer active:scale-[0.98] transition-transform" style="height:140px;background:${grad}">
@@ -628,13 +634,27 @@ function renderHome() {
   }
 
   return `
-    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
-      <div class="bg-white" style="border-bottom:1px solid #e5e7eb">
-        <div class="px-5 pt-6 pb-2">
-          <p style="font-size:12px;font-weight:600;color:#9ca3af">${getGreeting()}</p>
-          <h1 class="font-black text-2xl text-gray-900 leading-tight">Heather</h1>
+    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#FEFCE8">
+      <div style="background:#2D6A4F;box-shadow:0 8px 32px rgba(0,0,0,0.28),0 2px 0 rgba(255,255,255,0.08) inset">
+        <div class="px-5 flex items-center justify-between" style="padding-top:28px;padding-bottom:28px">
+          <\!-- PWA-style logo + title -->
+          <button data-action="go-home" class="flex items-center gap-3" style="background:none;border:none;cursor:pointer;padding:0">
+            <img src="${window._appIcon||''}" style="width:44px;height:44px;border-radius:11px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+            <span style="font-size:18px;font-weight:900;color:#ffffff;letter-spacing:.01em">HEATHER'S WORKOUT</span>
+          </button>
+          <\!-- Desktop nav tabs (hidden on mobile) -->
+          <div class="desk-nav" style="display:none;gap:4px">
+            ${[
+              {label:'Workouts',action:'go-home',   active:true},
+              {label:'Planner', action:'open-planner', active:false},
+              {label:'Progress',action:'open-progress',active:false},
+            ].map(it=>`<button data-action="${it.action}" style="padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:${it.active?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.15)'};color:${it.active?'#2D6A4F':'rgba(255,255,255,0.85)'}">${it.label}</button>`).join('')}
+          </div>
         </div>
-        ${renderCalendarStrip()}
+        <\!-- Calendar on white -->
+        <div style="background:#ffffff;padding-top:12px">
+          ${renderCalendarStrip()}
+        </div>
       </div>
       <div class="px-5 py-6">
         ${todayBanner}
@@ -717,11 +737,11 @@ function renderWorkoutDetail(){
   const w=state.activeWorkout,type=state.workoutType; if(!w) return '';
   const progress=getProgress();
   const stickyHdr=(title,subtitle)=>`
-    <div class="sticky top-0 z-40" style="background:#111827">
-      <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:14px;padding-bottom:14px">
+    <div class="sticky top-0 z-40" style="background:linear-gradient(180deg,#1a2235 0%,#111827 100%);box-shadow:0 8px 32px rgba(0,0,0,0.55),0 2px 0 rgba(255,255,255,0.08) inset">
+      <div class="flex items-center px-4 gap-3" style="min-height:88px;padding-top:28px;padding-bottom:28px">
         <button data-action="go-home" class="w-10 h-10 flex items-center justify-center shrink-0 rounded-full" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)">${icon('arrow-left','w-5 h-5')}</button>
         <div class="flex-1 text-center">
-          <h2 class="font-black text-white" style="font-size:17px;line-height:1.3">${title}</h2>
+          <h2 class="font-black text-white" style="font-size:18px;line-height:1.3">${title}</h2>
           <p style="font-size:11px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.06em;margin-top:2px">${subtitle}</p>
         </div>
         <div class="w-10 shrink-0"></div>
@@ -732,7 +752,7 @@ function renderWorkoutDetail(){
     <button data-action="finish-workout" class="w-full font-black text-gray-900 text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2" style="background:#F5C300">${icon('check-circle-2','w-5 h-5')} FINISH WORKOUT</button></div>`;
   
 
-  if(type==='cardio') return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">
+  if(type==='cardio') return `<div class="flex flex-col w-full min-h-screen" style="background:#FEFCE8">
     ${stickyHdr(w.workout_name,w.category_title)}
     <div style="padding:24px 20px 120px"><div class="space-y-4" style="max-width:600px;margin:0 auto">
       <div class="rounded-2xl p-6 text-center" style="background:#111827">${icon('bike','w-12 h-12 text-secondary mx-auto mb-3')}<p class="font-black text-white text-xl">${w.workout_name}</p><p style="color:rgba(255,255,255,.5);font-size:14px;margin-top:4px">Recommended: <span style="font-weight:700;color:#00A79D">${w.recommended_time}</span></p></div>
@@ -740,14 +760,14 @@ function renderWorkoutDetail(){
       ${w.instructions.map((s,i)=>`<div class="flex gap-3 items-start"><span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-black text-gray-900 mt-0.5" style="font-size:11px;background:#F5C300">${i+1}</span><p class="text-sm text-gray-700 font-medium pt-0.5">${s}</p></div>`).join('')}
       </div></div></div>
     ${finishBtn}</div>`;
-  if(type==='cooldown'){const rids=w.routine.map(e=>e.id);return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">
+  if(type==='cooldown'){const rids=w.routine.map(e=>e.id);return `<div class="flex flex-col w-full min-h-screen" style="background:#FEFCE8">
     ${stickyHdr(w.workout_name,w.category_title)}
     <div style="padding:24px 20px 120px"><section><div class="flex items-center justify-between mb-4"><h3 class="font-black text-gray-900 uppercase tracking-tight">Mobility Routine</h3>${renderBlockCheck(rids)}</div><div class="space-y-3">${w.routine.map(ex=>renderExerciseCard(ex,false)).join('')}</div></section></div>
     ${finishBtn}</div>`;}
   const wuIds=w.warm_up.map(e=>e.id);
   const wuCollapsed=state.warmUpCollapsed;
   const wuDone=wuIds.every(id=>state.completedExercises.has(id));
-  return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-8" style="padding-bottom:120px">
+  return `<div class="flex flex-col w-full min-h-screen" style="background:#FEFCE8">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-8" style="padding-bottom:120px">
     <section>
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-black text-gray-900 uppercase tracking-tight">Warm Up</h3>
@@ -859,15 +879,15 @@ function renderPlanner(){
   }).join('');
 
   return `
-    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
-      <div class="sticky top-0 z-40 bg-white shadow-sm">
-        <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:12px;padding-bottom:12px">
-          <button data-action="go-home" class="w-10 h-10 flex items-center justify-center rounded-full shrink-0" style="color:#6b7280;background:#f3f4f6">${icon('arrow-left','w-5 h-5')}</button>
-          <div class="flex-1 text-center">
-            <h2 class="font-black text-gray-900" style="font-size:18px;line-height:1.3">Weekly Planner</h2>
-            <p style="font-size:11px;text-transform:uppercase;font-weight:700;color:#9ca3af;letter-spacing:.05em;margin-top:2px">Changes save instantly</p>
-          </div>
-          <div class="w-10 shrink-0"></div>
+    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#FEFCE8">
+      <div class="sticky top-0 z-40" style="background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset">
+        <div class="px-4 flex items-center gap-3" style="padding-top:28px;padding-bottom:28px">
+          <img src="${window._appIcon||''}" style="width:42px;height:42px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+          <h2 class="font-black" style="font-size:18px;font-weight:900;line-height:1.2;color:#ffffff;flex:1">Weekly Planner</h2>
+          <button data-action="go-home" class="flex items-center gap-2 rounded-full px-4 py-2" style="color:#ffffff;background:rgba(255,255,255,0.2);border:none;cursor:pointer;white-space:nowrap">
+            ${icon('arrow-left','w-4 h-4')}
+            <span style="font-size:12px;font-weight:700">Back</span>
+          </button>
         </div>
       </div>
       <div class="px-5 py-5">
@@ -902,7 +922,7 @@ function renderProgress(){
     const dotType=entry?(entry.workoutId.startsWith('Cardio')?'cardio':'strength'):null;
     const dotBg=dotType==='cardio'?'#00A79D':dotType==='strength'?'#F5C300':'transparent';
     return `<div class="flex flex-col items-center gap-1.5">
-      <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${isToday?'#111827':'#9ca3af'}">${dayName}</span>
+      <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${isToday?'#111827':'rgba(255,255,255,0.7)'}">${dayName}</span>
       <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:${hasWorkout?dotBg:isFuture?'#f3f4f6':'#f3f4f6'};border:${isToday&&!hasWorkout?'2px solid #F5C300':'2px solid transparent'}">
         ${hasWorkout?icon('check','w-4 h-4 '+(dotType==='strength'?'text-gray-900':'text-white')):''}
       </div>
@@ -940,23 +960,23 @@ function renderProgress(){
   const earnedCount=ACHIEVEMENTS.filter(a=>a.check()).length;
 
   return `
-    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
-      <div class="sticky top-0 z-40 bg-white shadow-sm">
-        <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:12px;padding-bottom:12px">
-          <button data-action="go-home" class="w-10 h-10 flex items-center justify-center rounded-full shrink-0" style="color:#6b7280;background:#f3f4f6">${icon('arrow-left','w-5 h-5')}</button>
-          <div class="flex-1 text-center">
-            <h2 class="font-black text-gray-900" style="font-size:18px;line-height:1.3">Progress</h2>
-            <p style="font-size:11px;text-transform:uppercase;font-weight:700;color:#9ca3af;letter-spacing:.05em;margin-top:2px">Your stats</p>
-          </div>
-          <div class="w-10 shrink-0"></div>
+    <div class="flex flex-col w-full min-h-screen pb-28" style="background:#FEFCE8">
+      <div class="sticky top-0 z-40" style="background:#2D6A4F;box-shadow:0 8px 28px rgba(0,0,0,0.26),0 2px 0 rgba(255,255,255,0.08) inset">
+        <div class="px-4 flex items-center gap-3" style="padding-top:28px;padding-bottom:28px">
+          <img src="${window._appIcon||''}" style="width:42px;height:42px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.35);flex-shrink:0" alt="logo">
+          <h2 class="font-black" style="font-size:18px;font-weight:900;line-height:1.2;color:#ffffff;flex:1">Progress</h2>
+          <button data-action="go-home" class="flex items-center gap-2 rounded-full px-4 py-2" style="color:#ffffff;background:rgba(255,255,255,0.2);border:none;cursor:pointer;white-space:nowrap">
+            ${icon('arrow-left','w-4 h-4')}
+            <span style="font-size:12px;font-weight:700">Back</span>
+          </button>
         </div>
       </div>
 
-      <div class="px-5 py-5">
-      <div class="space-y-5">
+      <div class="px-5" style="padding-top:28px;padding-bottom:32px">
+      <div style="display:flex;flex-direction:column;gap:20px">
 
         <!-- Stats row -->
-        <div class="grid gap-3" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="grid gap-4" style="grid-template-columns:1fr 1fr 1fr">
           <div class="bg-white rounded-2xl p-4 shadow-soft text-center">
             <p class="font-black text-gray-900" style="font-size:28px;line-height:1">${weeklyCount}</p>
             <p style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-top:4px">This Week</p>
@@ -993,13 +1013,13 @@ function renderProgress(){
             <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Achievements</h3>
             <span style="font-size:11px;font-weight:600;color:#9ca3af">${earnedCount}/${ACHIEVEMENTS.length} earned</span>
           </div>
-          <div class="" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${badges}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">${badges}</div>
         </div>
 
         <!-- History -->
         <div>
           <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm mb-3">Session History</h3>
-          <div class="space-y-2">${historyHtml}</div>
+          <div style="display:flex;flex-direction:column;gap:10px">${historyHtml}</div>
         </div>
 
         <!-- Data & Backup -->
@@ -1061,7 +1081,7 @@ function render(){
   else if(state.activeView==='planner') html=renderPlanner();
   else if(state.activeView==='progress')html=renderProgress();
   if(state.activeView==='history'){state.activeView='progress';html=renderProgress();}
-  document.getElementById('app').innerHTML=`${renderTopNav()}<div class="app-outer min-h-screen w-full flex justify-center" style="background:#1a1a2e"><div class="app-frame w-full max-w-[430px] relative shadow-2xl overflow-x-hidden min-h-[100dvh]" style="background:#F7F6F3">${html}</div></div>`;
+  document.getElementById('app').innerHTML=`<div class="app-outer min-h-screen w-full flex justify-center" style="background:#1a1a2e"><div class="app-frame w-full max-w-[430px] relative shadow-2xl overflow-x-hidden min-h-[100dvh]" style="background:#FEFCE8">${html}</div></div>`;
 }
 
 // ====================================================================
@@ -1212,6 +1232,7 @@ function setupPWA() {
 // INIT
 // ====================================================================
 loadStorage();
+window._appIcon = generateAppIcon(64);
 render();
 setupPWA();
 
