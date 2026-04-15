@@ -167,6 +167,15 @@
     .workout-card::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.35) 100%); pointer-events:none; }
     .star-btn { background: none; border: none; cursor: pointer; padding: 2px; font-size: 28px; line-height: 1; transition: transform .15s; }
     .star-btn:active { transform: scale(1.3); }
+
+    /* ── Desktop (640px+) ─────────────────────────────── */
+    @media (min-width:640px){
+      body { background:#1a1a2e; }
+      .desk-nav  { display:flex!important; }
+      .mobile-nav { display:none!important; }
+      .app-outer { align-items:flex-start!important; padding:24px 0 48px; }
+      .app-frame { max-width:680px!important; margin:0 auto; border-radius:20px!important; overflow:hidden!important; }
+    }
   </style>
 </head>
 <body>
@@ -495,7 +504,7 @@ function renderBottomNav() {
     {id:'progress',ic:'bar-chart-2',label:'Progress',action:'open-progress',active:v==='progress'},
   ];
   return `
-    <div class="fixed bottom-0 w-full max-w-[430px] bg-white border-t border-gray-100 px-3 pt-2 z-50" style="padding-bottom:max(1.5rem,env(safe-area-inset-bottom))">
+    <div class="mobile-nav fixed bottom-0 w-full max-w-[430px] bg-white border-t border-gray-100 px-3 pt-2 z-50" style="padding-bottom:max(1.5rem,env(safe-area-inset-bottom))">
       <div class="flex justify-around items-center">
         ${items.map(it=>`
           <button data-action="${it.action}" class="flex flex-col items-center flex-1 py-1.5 gap-0.5 rounded-xl transition-colors">
@@ -504,6 +513,32 @@ function renderBottomNav() {
               : `<div class="w-10 h-10 flex items-center justify-center text-gray-400">${icon(it.ic,'w-5 h-5')}</div>`}
             <span style="font-size:10px;font-weight:600;color:${it.active?'#111827':'#9ca3af'}">${it.label}</span>
           </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderTopNav() {
+  const v=state.activeView;
+  const items=[
+    {label:'Workouts',action:'go-home',   active:v==='home'||v==='detail'||v==='complete'},
+    {label:'Planner', action:'open-planner', active:v==='planner'},
+    {label:'Progress',action:'open-progress',active:v==='progress'},
+  ];
+  return `
+    <div class="desk-nav" style="display:none;position:sticky;top:0;z-index:100;background:white;border-bottom:1px solid #e5e7eb;width:100%">
+      <div style="max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px">
+        <button data-action="go-home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0">
+          <div style="width:32px;height:32px;border-radius:8px;background:#F5C300;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${icon('dumbbell','w-4 h-4 text-gray-900')}
+          </div>
+          <span style="font-size:15px;font-weight:900;color:#111827;letter-spacing:-.01em">HEATHER'S WORKOUT</span>
+        </button>
+        <div style="display:flex;gap:4px">
+          ${items.map(it=>`
+            <button data-action="${it.action}" style="padding:8px 18px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;background:${it.active?'#F5C300':'transparent'};color:${it.active?'#111827':'#6b7280'}">
+              ${it.label}
+            </button>`).join('')}
+        </div>
       </div>
     </div>`;
 }
@@ -594,33 +629,32 @@ function renderHome() {
 
   return `
     <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
-      <div class="px-5 pt-6 pb-2 bg-white">
-        <div class="mb-5">
+      <div class="bg-white" style="border-bottom:1px solid #e5e7eb">
+        <div class="px-5 pt-6 pb-2">
           <p style="font-size:12px;font-weight:600;color:#9ca3af">${getGreeting()}</p>
           <h1 class="font-black text-2xl text-gray-900 leading-tight">Heather</h1>
         </div>
         ${renderCalendarStrip()}
       </div>
-      <div class="mt-6">${todayBanner}</div>
-      <div class="px-5 mb-6">
+      <div class="px-5 py-6">
+        ${todayBanner}
         <p style="font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">This Week</p>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">${workoutCards.join('')}</div>
-      </div>
-      <div class="px-5 space-y-3">
-        <p style="font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">More</p>
-        <div data-action="open-workout" data-workout-id="CoolDown" data-workout-type="cooldown"
-          class="workout-card cursor-pointer active:scale-[0.98] transition-transform" style="height:90px;background:${CARD_GRADIENTS['CoolDown']}">
-          <div class="relative z-10 h-full flex items-center justify-between px-5">
-            <div><span style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.7)">Recovery</span>
-              <h3 class="font-black text-white text-base mt-0.5">${cool_down.workout_name}</h3></div>
-            <div class="flex items-center gap-1 text-white"><span style="font-size:13px;font-weight:700">${cool_down.routine.length} exercises</span>${icon('chevron-right','w-4 h-4')}</div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-6">${workoutCards.join('')}</div>
+        <div class="space-y-3">
+          <div data-action="open-workout" data-workout-id="CoolDown" data-workout-type="cooldown"
+            class="workout-card cursor-pointer active:scale-[0.98] transition-transform" style="height:90px;background:${CARD_GRADIENTS['CoolDown']}">
+            <div class="relative z-10 h-full flex items-center justify-between px-5">
+              <div><span style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.7)">Recovery</span>
+                <h3 class="font-black text-white text-base mt-0.5">${cool_down.workout_name}</h3></div>
+              <div class="flex items-center gap-1 text-white"><span style="font-size:13px;font-weight:700">${cool_down.routine.length} exercises</span>${icon('chevron-right','w-4 h-4')}</div>
+            </div>
           </div>
+          <button data-action="open-progress" class="w-full bg-white rounded-2xl p-4 shadow-soft flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform">
+            <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,167,157,.12)">${icon('trending-up','w-5 h-5 text-secondary')}</div>
+            <div class="flex-1 text-left"><p class="font-bold text-gray-900">Progress &amp; History</p><p style="font-size:11px;color:#9ca3af;font-weight:500">${state.workoutHistory.length} session${state.workoutHistory.length!==1?'s':''} logged · ${getStreak()} day streak</p></div>
+            ${icon('chevron-right','w-4 h-4 text-gray-300')}
+          </button>
         </div>
-        <button data-action="open-progress" class="w-full bg-white rounded-2xl p-4 shadow-soft flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform">
-          <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style="background:rgba(0,167,157,.12)">${icon('trending-up','w-5 h-5 text-secondary')}</div>
-          <div class="flex-1 text-left"><p class="font-bold text-gray-900">Progress &amp; History</p><p style="font-size:11px;color:#9ca3af;font-weight:500">${state.workoutHistory.length} session${state.workoutHistory.length!==1?'s':''} logged · ${getStreak()} day streak</p></div>
-          ${icon('chevron-right','w-4 h-4 text-gray-300')}
-        </button>
       </div>
     </div>
     ${renderBottomNav()}`;
@@ -644,7 +678,13 @@ function renderExerciseCard(ex,showWeightTracker){
     const suggBadge=suggested!==null?`<div class="flex items-center gap-2 pt-1"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af">Suggested</span><span class="font-black text-secondary rounded-full px-2 py-0.5" style="font-size:11px;background:rgba(0,167,157,.1)">${Number.isInteger(suggested)?suggested:suggested.toFixed(1)} lbs</span></div>`:'';
     const weightRow=!ex.noWeightInput?`${suggBadge}<div class="flex items-center gap-3">${icon('dumbbell','w-4 h-4 text-gray-400 shrink-0')}<div class="flex items-center gap-2">
       <button data-action="adjust-weight" data-exercise-id="${ex.id}" data-delta="-2.5" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center active:scale-95 transition-transform text-base">−</button>
-      <div class="text-center w-20" id="weight-display-${ex.id}"><span class="font-black text-gray-900 text-base">${Number.isInteger(weight)?weight:weight.toFixed(1)}</span><span style="font-size:11px;color:#9ca3af;margin-left:3px">lbs</span></div>
+      <div class="flex items-center gap-1">
+        <input type="number" id="weight-input-${ex.id}" data-action="weight-input" data-exercise-id="${ex.id}"
+          value="${Number.isInteger(weight)?weight:weight.toFixed(1)}" min="0" step="2.5"
+          style="width:64px;text-align:center;font-size:16px;font-weight:900;color:#111827;background:#f9fafb;border:2px solid #e5e7eb;border-radius:10px;padding:4px 0;outline:none"
+          onfocus="this.style.borderColor='#F5C300'" onblur="this.style.borderColor='#e5e7eb'">
+        <span style="font-size:11px;color:#9ca3af">lbs</span>
+      </div>
       <button data-action="adjust-weight" data-exercise-id="${ex.id}" data-delta="2.5" class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center active:scale-95 transition-transform text-base">+</button>
       </div><span id="saved-badge-${ex.id}" class="ml-auto font-bold text-secondary flex items-center gap-1 ${isRecorded?'':'hidden'}" style="font-size:11px">${icon('check','w-3.5 h-3.5')} Saved</span></div>`:'';
     const effortBtns=EFFORT_LABELS.map((label,i)=>{const val=i+1,sel=effort===val;return `<button data-action="select-effort" data-exercise-id="${ex.id}" data-effort="${val}" data-no-weight="${ex.noWeightInput?'1':'0'}" title="${label}" class="effort-btn flex-1 h-9 rounded-xl border-2 transition-all active:scale-95 ${sel?EFFORT_ACTIVE[i]+' scale-105':'bg-gray-50 text-gray-400 border-transparent'}" style="font-size:11px;font-weight:700">${val}</button>`;}).join('');
@@ -676,29 +716,38 @@ function renderBlockCheck(exerciseIds){
 function renderWorkoutDetail(){
   const w=state.activeWorkout,type=state.workoutType; if(!w) return '';
   const progress=getProgress();
-  const stickyHdr=(title,subtitle)=>`<div class="sticky top-0 z-40" style="background:#111827">
-    <div class="flex items-center px-5 relative" style="min-height:72px;padding-top:14px;padding-bottom:14px">
-      <button data-action="go-home" class="w-10 h-10 flex items-center justify-center shrink-0 rounded-full" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)">${icon('arrow-left','w-5 h-5')}</button>
-      <div class="flex-1 text-center px-3">
-        <h2 class="font-black text-white" style="font-size:17px;line-height:1.3">${title}</h2>
-        <p style="font-size:11px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.06em;margin-top:2px">${subtitle}</p>
+  const stickyHdr=(title,subtitle)=>`
+    <div class="sticky top-0 z-40" style="background:#111827">
+      <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:14px;padding-bottom:14px">
+        <button data-action="go-home" class="w-10 h-10 flex items-center justify-center shrink-0 rounded-full" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)">${icon('arrow-left','w-5 h-5')}</button>
+        <div class="flex-1 text-center">
+          <h2 class="font-black text-white" style="font-size:17px;line-height:1.3">${title}</h2>
+          <p style="font-size:11px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.06em;margin-top:2px">${subtitle}</p>
+        </div>
+        <div class="w-10 shrink-0"></div>
       </div>
-      <div class="w-10 shrink-0"></div>
-    </div>
-    <div class="w-full h-1" style="background:rgba(255,255,255,.1)"><div class="h-full transition-all duration-500 ease-out" style="width:${progress}%;background:#F5C300"></div></div>
-  </div>`;
+      <div class="w-full h-1" style="background:rgba(255,255,255,.1)"><div class="h-full transition-all duration-500 ease-out" style="width:${progress}%;background:#F5C300"></div></div>
+    </div>`;
   const finishBtn=`<div class="fixed bottom-0 w-full max-w-[430px] p-5 pt-8" style="background:linear-gradient(to top,#F7F6F3 60%,transparent)">
     <button data-action="finish-workout" class="w-full font-black text-gray-900 text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2" style="background:#F5C300">${icon('check-circle-2','w-5 h-5')} FINISH WORKOUT</button></div>`;
-  if(type==='cardio') return `<div class="flex flex-col w-full min-h-screen pb-32" style="background:#F7F6F3">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-4">
-    <div class="rounded-2xl p-6 text-center" style="background:#111827">${icon('bike','w-12 h-12 text-secondary mx-auto mb-3')}<p class="font-black text-white text-xl">${w.workout_name}</p><p class="text-white/50 text-sm mt-1">Recommended: <span class="font-bold text-secondary">${w.recommended_time}</span></p></div>
-    <div class="bg-white rounded-2xl p-5 shadow-soft space-y-3"><h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Structure</h3>
-    ${w.instructions.map((s,i)=>`<div class="flex gap-3 items-start"><span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-black text-gray-900 mt-0.5" style="font-size:11px;background:#F5C300">${i+1}</span><p class="text-sm text-gray-700 font-medium pt-0.5">${s}</p></div>`).join('')}
-    </div></div>${finishBtn}</div>`;
-  if(type==='cooldown'){const rids=w.routine.map(e=>e.id);return `<div class="flex flex-col w-full min-h-screen pb-32" style="background:#F7F6F3">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-8"><section><div class="flex items-center justify-between mb-4"><h3 class="font-black text-gray-900 uppercase tracking-tight">Mobility Routine</h3>${renderBlockCheck(rids)}</div><div class="space-y-3">${w.routine.map(ex=>renderExerciseCard(ex,false)).join('')}</div></section></div>${finishBtn}</div>`;}
+  
+
+  if(type==='cardio') return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">
+    ${stickyHdr(w.workout_name,w.category_title)}
+    <div style="padding:24px 20px 120px"><div class="space-y-4" style="max-width:600px;margin:0 auto">
+      <div class="rounded-2xl p-6 text-center" style="background:#111827">${icon('bike','w-12 h-12 text-secondary mx-auto mb-3')}<p class="font-black text-white text-xl">${w.workout_name}</p><p style="color:rgba(255,255,255,.5);font-size:14px;margin-top:4px">Recommended: <span style="font-weight:700;color:#00A79D">${w.recommended_time}</span></p></div>
+      <div class="bg-white rounded-2xl p-5 shadow-soft space-y-3"><h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Structure</h3>
+      ${w.instructions.map((s,i)=>`<div class="flex gap-3 items-start"><span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-black text-gray-900 mt-0.5" style="font-size:11px;background:#F5C300">${i+1}</span><p class="text-sm text-gray-700 font-medium pt-0.5">${s}</p></div>`).join('')}
+      </div></div></div>
+    ${finishBtn}</div>`;
+  if(type==='cooldown'){const rids=w.routine.map(e=>e.id);return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">
+    ${stickyHdr(w.workout_name,w.category_title)}
+    <div style="padding:24px 20px 120px"><section><div class="flex items-center justify-between mb-4"><h3 class="font-black text-gray-900 uppercase tracking-tight">Mobility Routine</h3>${renderBlockCheck(rids)}</div><div class="space-y-3">${w.routine.map(ex=>renderExerciseCard(ex,false)).join('')}</div></section></div>
+    ${finishBtn}</div>`;}
   const wuIds=w.warm_up.map(e=>e.id);
   const wuCollapsed=state.warmUpCollapsed;
   const wuDone=wuIds.every(id=>state.completedExercises.has(id));
-  return `<div class="flex flex-col w-full min-h-screen pb-32" style="background:#F7F6F3">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-8">
+  return `<div class="flex flex-col w-full min-h-screen" style="background:#F7F6F3">${stickyHdr(w.workout_name,w.category_title)}<div class="px-5 py-6 space-y-8" style="padding-bottom:120px">
     <section>
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-black text-gray-900 uppercase tracking-tight">Warm Up</h3>
@@ -812,7 +861,7 @@ function renderPlanner(){
   return `
     <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
       <div class="sticky top-0 z-40 bg-white shadow-sm">
-        <div class="flex items-center px-4 gap-2" style="min-height:72px;padding-top:12px;padding-bottom:12px">
+        <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:12px;padding-bottom:12px">
           <button data-action="go-home" class="w-10 h-10 flex items-center justify-center rounded-full shrink-0" style="color:#6b7280;background:#f3f4f6">${icon('arrow-left','w-5 h-5')}</button>
           <div class="flex-1 text-center">
             <h2 class="font-black text-gray-900" style="font-size:18px;line-height:1.3">Weekly Planner</h2>
@@ -821,10 +870,9 @@ function renderPlanner(){
           <div class="w-10 shrink-0"></div>
         </div>
       </div>
-
       <div class="px-5 py-5">
         <p style="font-size:12px;color:#9ca3af;font-weight:500;margin-bottom:20px">Tap any day to change its workout.</p>
-        ${dayRows}
+        <div class="">${dayRows}</div>
         ${isCustom?`
           <button data-action="reset-planner" class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-gray-200 mt-2 active:scale-[0.98] transition-all" style="font-size:13px;font-weight:700;color:#9ca3af">
             ${icon('trash2','w-4 h-4')} Reset to Default Schedule
@@ -894,7 +942,7 @@ function renderProgress(){
   return `
     <div class="flex flex-col w-full min-h-screen pb-28" style="background:#F7F6F3">
       <div class="sticky top-0 z-40 bg-white shadow-sm">
-        <div class="flex items-center px-4 gap-2" style="min-height:72px;padding-top:12px;padding-bottom:12px">
+        <div class="flex items-center px-4 gap-3" style="min-height:72px;padding-top:12px;padding-bottom:12px">
           <button data-action="go-home" class="w-10 h-10 flex items-center justify-center rounded-full shrink-0" style="color:#6b7280;background:#f3f4f6">${icon('arrow-left','w-5 h-5')}</button>
           <div class="flex-1 text-center">
             <h2 class="font-black text-gray-900" style="font-size:18px;line-height:1.3">Progress</h2>
@@ -904,7 +952,8 @@ function renderProgress(){
         </div>
       </div>
 
-      <div class="px-5 py-5 space-y-5">
+      <div class="px-5 py-5">
+      <div class="space-y-5">
 
         <!-- Stats row -->
         <div class="grid gap-3" style="grid-template-columns:1fr 1fr 1fr">
@@ -944,7 +993,7 @@ function renderProgress(){
             <h3 class="font-black text-gray-900 uppercase tracking-tight text-sm">Achievements</h3>
             <span style="font-size:11px;font-weight:600;color:#9ca3af">${earnedCount}/${ACHIEVEMENTS.length} earned</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${badges}</div>
+          <div class="" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${badges}</div>
         </div>
 
         <!-- History -->
@@ -995,7 +1044,7 @@ function renderProgress(){
           </div>
         </div>
 
-      </div>
+      </div></div>
     </div>
     ${renderBottomNav()}`;
 }
@@ -1012,7 +1061,7 @@ function render(){
   else if(state.activeView==='planner') html=renderPlanner();
   else if(state.activeView==='progress')html=renderProgress();
   if(state.activeView==='history'){state.activeView='progress';html=renderProgress();}
-  document.getElementById('app').innerHTML=`<div class="min-h-screen w-full flex justify-center" style="background:#1a1a2e"><div class="w-full max-w-[430px] relative shadow-2xl overflow-x-hidden min-h-[100dvh]" style="background:#F7F6F3">${html}</div></div>`;
+  document.getElementById('app').innerHTML=`${renderTopNav()}<div class="app-outer min-h-screen w-full flex justify-center" style="background:#1a1a2e"><div class="app-frame w-full max-w-[430px] relative shadow-2xl overflow-x-hidden min-h-[100dvh]" style="background:#F7F6F3">${html}</div></div>`;
 }
 
 // ====================================================================
@@ -1038,8 +1087,8 @@ document.getElementById('app').addEventListener('click',function(e){
     const id=el.dataset.exerciseId,delta=parseFloat(el.dataset.delta);
     const next=parseFloat(Math.max(0,(state.exerciseWeights[id]??0)+delta).toFixed(1));
     state.exerciseWeights[id]=next;
-    const disp=document.getElementById(`weight-display-${id}`);
-    if(disp) disp.innerHTML=`<span class="font-black text-gray-900 text-base">${Number.isInteger(next)?next:next.toFixed(1)}</span><span style="font-size:11px;color:#9ca3af;margin-left:3px">lbs</span>`;
+    const inp=document.getElementById(`weight-input-${id}`);
+    if(inp) inp.value=Number.isInteger(next)?next:next.toFixed(1);
   }
   else if(action==='select-effort'){
     const id=el.dataset.exerciseId,effortVal=parseInt(el.dataset.effort),noWeight=el.dataset.noWeight==='1';
@@ -1165,6 +1214,15 @@ function setupPWA() {
 loadStorage();
 render();
 setupPWA();
+
+// Weight input (typed) — delegated
+document.getElementById('app').addEventListener('input',function(e){
+  if(e.target.dataset.action==='weight-input'){
+    const id=e.target.dataset.exerciseId;
+    const val=parseFloat(e.target.value);
+    state.exerciseWeights[id]=isNaN(val)?0:Math.max(0,val);
+  }
+});
 
 // File import — delegated since input is re-rendered with the page
 document.getElementById('app').addEventListener('change',function(e){
